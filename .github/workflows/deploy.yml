@@ -52,6 +52,8 @@ jobs:
   deploy:
     needs: build-and-push
     runs-on: ubuntu-latest
+    env:
+      DEPLOY_TARGET: ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}
 
     steps:
       - name: Setup SSH Key
@@ -63,28 +65,23 @@ jobs:
 
       - name: Login to GHCR on server
         run: |
-          ssh -i ~/.ssh/id_deploy ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} \
-            "echo ${{ secrets.GITHUB_TOKEN }} | docker login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin"
+          ssh -i ~/.ssh/id_deploy $DEPLOY_TARGET "echo ${{ secrets.GITHUB_TOKEN }} | docker login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin"
 
       - name: Pull latest Docker image
         run: |
-          ssh -i ~/.ssh/id_deploy ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} \
-            "docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:master"
+          ssh -i ~/.ssh/id_deploy $DEPLOY_TARGET "docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:main"
 
       - name: Stop and remove old container
         run: |
-          ssh -i ~/.ssh/id_deploy ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} \
-            "docker stop ikn-company-profile || true && docker rm ikn-company-profile || true"
+          ssh -i ~/.ssh/id_deploy $DEPLOY_TARGET "docker stop ikn-company-profile || true && docker rm ikn-company-profile || true"
 
       - name: Run new container
         run: |
-          ssh -i ~/.ssh/id_deploy ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} \
-            "docker run -d --name ikn-company-profile -p 3000:80 --restart unless-stopped ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:master"
+          ssh -i ~/.ssh/id_deploy $DEPLOY_TARGET "docker run -d --name ikn-company-profile -p 3000:80 --restart unless-stopped ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:main"
 
       - name: Verify deployment
         run: |
-          ssh -i ~/.ssh/id_deploy ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} \
-            "docker ps | grep ikn-company-profile && echo '✅ Container running'"
+          ssh -i ~/.ssh/id_deploy $DEPLOY_TARGET "docker ps | grep ikn-company-profile && echo 'Container running'"
 
       - name: Deployment Status
         if: success()
