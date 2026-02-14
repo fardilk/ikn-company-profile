@@ -61,41 +61,38 @@ jobs:
           chmod 600 ~/.ssh/id_deploy
           ssh-keyscan -H ${{ secrets.DEPLOY_HOST }} >> ~/.ssh/known_hosts 2>/dev/null || true
 
-      - name: Login to GHCR on server
+      - name: Deploy to production server
         env:
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
           DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REGISTRY: ${{ env.REGISTRY }}
+          IMAGE_NAME: ${{ env.IMAGE_NAME }}
         run: |
-          ssh -i ~/.ssh/id_deploy ${DEPLOY_USER}@${DEPLOY_HOST} "echo ${GITHUB_TOKEN} | docker login ghcr.io -u ${{ github.actor }} --password-stdin"
+          ssh -i ~/.ssh/id_deploy ${DEPLOY_USER}@${DEPLOY_HOST} << 'EOF'
+          set -e
 
-      - name: Pull latest Docker image
-        env:
-          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
-          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
-        run: |
-          ssh -i ~/.ssh/id_deploy ${DEPLOY_USER}@${DEPLOY_HOST} "docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:main"
+          echo "🔐 Logging in to GHCR..."
+          echo "${GITHUB_TOKEN}" | docker login ghcr.io -u fardilk --password-stdin
 
-      - name: Stop and remove old container
-        env:
-          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
-          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
-        run: |
-          ssh -i ~/.ssh/id_deploy ${DEPLOY_USER}@${DEPLOY_HOST} "docker stop ikn-company-profile || true && docker rm ikn-company-profile || true"
+          echo "📦 Pulling latest image..."
+          docker pull ${REGISTRY}/${IMAGE_NAME}:main
 
-      - name: Run new container
-        env:
-          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
-          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
-        run: |
-          ssh -i ~/.ssh/id_deploy ${DEPLOY_USER}@${DEPLOY_HOST} "docker run -d --name ikn-company-profile -p 3000:80 --restart unless-stopped ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:main"
+          echo "🛑 Stopping old container..."
+          docker stop ikn-company-profile || true
+          docker rm ikn-company-profile || true
 
-      - name: Verify deployment
-        env:
-          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
-          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
-        run: |
-          ssh -i ~/.ssh/id_deploy ${DEPLOY_USER}@${DEPLOY_HOST} "docker ps | grep ikn-company-profile && echo 'Container running'"
+          echo "🚀 Starting new container..."
+          docker run -d \
+            --name ikn-company-profile \
+            -p 3000:80 \
+            --restart unless-stopped \
+            ${REGISTRY}/${IMAGE_NAME}:main
+
+          echo "✅ Verifying deployment..."
+          docker ps | grep ikn-company-profile
+          echo "✅ Deployment successful!"
+          EOF
 
       - name: Deployment Status
         if: success()
