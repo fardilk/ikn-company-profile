@@ -69,30 +69,29 @@ jobs:
           REGISTRY: ${{ env.REGISTRY }}
           IMAGE_NAME: ${{ env.IMAGE_NAME }}
         run: |
-          ssh -i ~/.ssh/id_deploy ${DEPLOY_USER}@${DEPLOY_HOST} << 'EOF'
+          ssh -i ~/.ssh/id_deploy ${DEPLOY_USER}@${DEPLOY_HOST} bash << 'ENDSSH'
           set -e
+          GITHUB_TOKEN='${{ secrets.GITHUB_TOKEN }}'
+          REGISTRY='${{ env.REGISTRY }}'
+          IMAGE_NAME='${{ env.IMAGE_NAME }}'
 
           echo "🔐 Logging in to GHCR..."
-          echo "${GITHUB_TOKEN}" | docker login ghcr.io -u fardilk --password-stdin
+          echo "$GITHUB_TOKEN" | docker login ghcr.io -u fardilk --password-stdin
 
           echo "📦 Pulling latest image..."
-          docker pull ${REGISTRY}/${IMAGE_NAME}:main
+          docker pull $REGISTRY/$IMAGE_NAME:main
 
           echo "🛑 Stopping old container..."
           docker stop ikn-company-profile || true
           docker rm ikn-company-profile || true
 
           echo "🚀 Starting new container..."
-          docker run -d \
-            --name ikn-company-profile \
-            -p 3000:80 \
-            --restart unless-stopped \
-            ${REGISTRY}/${IMAGE_NAME}:main
+          docker run -d --name ikn-company-profile -p 3000:80 --restart unless-stopped $REGISTRY/$IMAGE_NAME:main
 
           echo "✅ Verifying deployment..."
-          docker ps | grep ikn-company-profile
-          echo "✅ Deployment successful!"
-          EOF
+          sleep 3
+          docker ps | grep ikn-company-profile && echo "✅ Deployment successful!"
+          ENDSSH
 
       - name: Deployment Status
         if: success()
