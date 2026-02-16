@@ -24,13 +24,19 @@ import type { ServiceDrawerProps } from '@/types/services';
  */
 export function ServiceDrawer({ isOpen, category, onClose }: ServiceDrawerProps) {
   const navigate = useNavigate();
-  const [isDesktop, setIsDesktop] = useState(false);
+
+  // Initialize with lazy function to avoid SSR issues and prevent cascading renders
+  const [isDesktop, setIsDesktop] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return window.matchMedia('(min-width: 768px)').matches;
+    }
+    return false;
+  });
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(min-width: 768px)');
-    setIsDesktop(mediaQuery.matches);
-
     const handler = (e: MediaQueryListEvent) => setIsDesktop(e.matches);
+
     mediaQuery.addEventListener('change', handler);
     return () => mediaQuery.removeEventListener('change', handler);
   }, []);
