@@ -36,8 +36,8 @@ export function ServiceDrawer({ isOpen, category, onClose }: ServiceDrawerProps)
 
   return (
     <Drawer open={isOpen} onOpenChange={onClose} dismissible>
-      <DrawerContent className="max-h-[90vh] bg-slate-900 border-slate-800">
-        <div className="overflow-y-auto">
+      <DrawerContent className="max-h-[90vh] bg-slate-900 border-slate-800 flex flex-col">
+        <div className="overflow-y-auto flex-1">
           <DrawerHeader className="relative border-b border-slate-800">
             <DrawerClose asChild>
               <button
