@@ -7,8 +7,11 @@ import PortfolioPage from './pages/PortfolioPage'
 import Contact from './pages/Contact'
 import { Navbar } from './components/layouts/Navbar'
 import { Footer } from './components/custom/Footer'
+import { useScrollToTop } from './hooks/useScrollToTop'
 
 function App() {
+  useScrollToTop()
+
   useEffect(() => {
     document.title = 'Infini Kreasi Nusantara'
     const metaDescription = document.querySelector('meta[name="description"]')
