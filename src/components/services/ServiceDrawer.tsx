@@ -1,5 +1,6 @@
 import { X, CheckCircle2, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import {
   Drawer,
   DrawerClose,
@@ -23,6 +24,16 @@ import type { ServiceDrawerProps } from '@/types/services';
  */
 export function ServiceDrawer({ isOpen, category, onClose }: ServiceDrawerProps) {
   const navigate = useNavigate();
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(min-width: 768px)');
+    setIsDesktop(mediaQuery.matches);
+
+    const handler = (e: MediaQueryListEvent) => setIsDesktop(e.matches);
+    mediaQuery.addEventListener('change', handler);
+    return () => mediaQuery.removeEventListener('change', handler);
+  }, []);
 
   if (!category) return null;
 
@@ -35,8 +46,8 @@ export function ServiceDrawer({ isOpen, category, onClose }: ServiceDrawerProps)
   };
 
   return (
-    <Drawer open={isOpen} onOpenChange={onClose} dismissible>
-      <DrawerContent className="max-h-[90vh] bg-slate-900 border-slate-800 flex flex-col">
+    <Drawer open={isOpen} onOpenChange={onClose} dismissible direction={isDesktop ? 'right' : 'bottom'}>
+      <DrawerContent className="h-full bg-slate-900 border-slate-800 flex flex-col">
         <div className="overflow-y-auto flex-1">
           <DrawerHeader className="relative border-b border-slate-800">
             <DrawerClose asChild>
