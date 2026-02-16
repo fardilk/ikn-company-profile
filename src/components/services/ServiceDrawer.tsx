@@ -1,4 +1,5 @@
-import { X, CheckCircle2 } from 'lucide-react';
+import { X, CheckCircle2, ArrowRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import {
   Drawer,
   DrawerClose,
@@ -21,9 +22,17 @@ import type { ServiceDrawerProps } from '@/types/services';
  * - CTA buttons for consultation
  */
 export function ServiceDrawer({ isOpen, category, onClose }: ServiceDrawerProps) {
+  const navigate = useNavigate();
+
   if (!category) return null;
 
   const Icon = category.icon;
+
+  const handleViewDetails = () => {
+    // Navigate to service detail page using slug
+    navigate(`/layanan/${category.slug}`);
+    onClose();
+  };
 
   return (
     <Drawer open={isOpen} onOpenChange={onClose} dismissible>
@@ -116,23 +125,23 @@ export function ServiceDrawer({ isOpen, category, onClose }: ServiceDrawerProps)
           <DrawerFooter className="border-t border-slate-800">
             <button
               className="w-full bg-blue-600 hover:bg-blue-700 text-white
-                         px-4 py-3 rounded-lg font-medium transition-colors"
+                         px-4 py-3 rounded-lg font-medium transition-colors
+                         flex items-center justify-center gap-2"
+              onClick={handleViewDetails}
+            >
+              Lihat Detail
+              <ArrowRight className="w-4 h-4" />
+            </button>
+            <button
+              className="w-full border border-slate-700 text-white/70
+                         hover:bg-slate-800 px-4 py-3 rounded-lg
+                         font-medium transition-colors"
               onClick={() => {
-                // Open WhatsApp or contact form
                 window.open('https://wa.me/6287887650480', '_blank');
               }}
             >
               Konsultasi Gratis
             </button>
-            <DrawerClose asChild>
-              <button
-                className="w-full border border-slate-700 text-white/70
-                           hover:bg-slate-800 px-4 py-3 rounded-lg
-                           font-medium transition-colors"
-              >
-                Tutup
-              </button>
-            </DrawerClose>
           </DrawerFooter>
         </div>
       </DrawerContent>

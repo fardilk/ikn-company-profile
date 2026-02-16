@@ -3,6 +3,7 @@ import { Routes, Route } from 'react-router-dom'
 import { Home } from './pages/Home'
 import TentangKami from './pages/TentangKami'
 import LayananPage from './pages/LayananPage'
+import ServiceDetailPage from './pages/ServiceDetailPage'
 import PortfolioPage from './pages/PortfolioPage'
 import Contact from './pages/Contact'
 import { Navbar } from './components/layouts/Navbar'
@@ -27,6 +28,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/tentang-kami" element={<TentangKami />} />
         <Route path="/layanan" element={<LayananPage />} />
+        <Route path="/layanan/:slug" element={<ServiceDetailPage />} />
         <Route path="/portfolio" element={<PortfolioPage />} />
         <Route path="/contact" element={<Contact />} />
       </Routes>
