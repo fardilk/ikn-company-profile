@@ -97,7 +97,7 @@ export function ServiceDrawer({ isOpen, category, onClose }: ServiceDrawerProps)
               <ul className="space-y-3" role="list">
                 {category.features.map((feature, idx) => (
                   <li key={idx} className="flex items-start text-white/80">
-                    <CheckCircle2 className="w-5 h-5 text-green-400 mr-3 mt-0.5 flex-shrink-0" />
+                    <CheckCircle2 className="w-5 h-5 text-green-400 mr-3 mt-0.5 shrink-0" />
                     <span>{feature}</span>
                   </li>
                 ))}
@@ -128,7 +128,7 @@ export function ServiceDrawer({ isOpen, category, onClose }: ServiceDrawerProps)
                 {category.benefits.map((benefit, idx) => (
                   <div
                     key={idx}
-                    className="p-4 rounded-xl bg-gradient-to-br
+                    className="p-4 rounded-xl bg-linear-to-br
                                from-blue-500/10 to-purple-500/10
                                border border-white/10"
                   >
